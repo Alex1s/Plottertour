@@ -12,16 +12,16 @@ def paths_to_tour(path_a: List[Point], path_b: List[Point], all_points_sorted: L
 
 
 def insert_at_index(path_a: List[Point], path_b: List[Point], i: int, point: Point) -> Tuple[List[Point], List[Point]]:
-    new_a = path_a.copy()
-    rest_of_a = new_a[i:]
-    new_a = new_a[:i]
-    new_a.append(point)
+    path_a = path_a[:]
+    path_b = path_b[:]
 
-    new_b = path_b.copy()
-    new_b += rest_of_a
-    new_b.sort(key=attrgetter('x'))
+    path_b += path_a[i:]
+    path_b.sort(key=attrgetter('x'))
 
-    return new_a, new_b
+    path_a = path_a[:i]
+    path_a.append(point)
+
+    return path_a, path_b
 
 
 def plottertour_paths(points: List[Point]) -> Tuple[List[Point], List[Point], List[Point]]:
@@ -75,8 +75,8 @@ def plottertour_paths(points: List[Point]) -> Tuple[List[Point], List[Point], Li
                 best_path_a = potential_better_a
                 best_path_b = potential_better_b
 
-        path_a = best_path_a.copy()
-        path_b = best_path_b.copy()
+        path_a = best_path_a
+        path_b = best_path_b
         tour = paths_to_tour(path_a, path_b, points)
         if 'DEBUG' in environ:
             print_plottertour(tour, MAX_VALUE, MAX_VALUE,

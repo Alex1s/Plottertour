@@ -6,13 +6,14 @@ from secrets import randbelow
 import matplotlib.pyplot as plt
 Point = namedtuple('Point', {'x': int, 'y': int})
 from typing import List, Tuple
+from os import environ
 
 Plottertour = namedtuple('Plottertour', {'upper': List[Point], 'lower': List[Point]})
 import numpy as np
 
 
-NUM_POINTS = 5
-MAX_VALUE = 10
+NUM_POINTS = 10
+MAX_VALUE = 15
 
 
 def print_plottertour(tour: List[Point], max_x: int, max_y: int, hline: float = None, path_a=None, path_b=None, title: str = None) -> None:
@@ -122,22 +123,23 @@ def plottertour_paths(points: List[Point]) -> Tuple[List[Point], List[Point], Li
 
     best_path_a = None
     best_path_b = None
-    best_weight = None
-    print(f'Points to be iterated: {points[1:-1]}')
     for point in points[1:-1]:
         best_weight = None
 
         for i in range(len(path_a) + 1):
             potential_better_a, potential_better_b = insert_at_index(path_a, path_b, i, point)
-            print(f'Potential Path A: {potential_better_a}')
-            print(f'Potential Path B: {potential_better_b}')
             potential_better_tour = paths_to_tour(potential_better_a, potential_better_b, points)
             potential_better_weight = tour_weight(potential_better_tour)
-            print_plottertour(potential_better_tour, MAX_VALUE, MAX_VALUE,
-                              path_a=[points[0]] + potential_better_a + [points[-1]],
-                              path_b=[points[0]] + potential_better_b + [points[-1]],
-                              title=f'POTENTIAL point={point}, i={i}, weight={potential_better_weight} (A)')
-            print(f'Tour ({potential_better_weight}): {potential_better_tour}')
+
+            if 'DEBUG' in environ:
+                print(f'Potential Path A: {potential_better_a}')
+                print(f'Potential Path B: {potential_better_b}')
+                print_plottertour(potential_better_tour, MAX_VALUE, MAX_VALUE,
+                                  path_a=[points[0]] + potential_better_a + [points[-1]],
+                                  path_b=[points[0]] + potential_better_b + [points[-1]],
+                                  title=f'POTENTIAL point={point}, i={i}, weight={potential_better_weight} (A)')
+                print(f'Tour ({potential_better_weight}): {potential_better_tour}')
+
             if best_weight is None or best_weight > potential_better_weight:
                 best_weight = potential_better_weight
                 best_path_a = potential_better_a
@@ -145,15 +147,16 @@ def plottertour_paths(points: List[Point]) -> Tuple[List[Point], List[Point], Li
 
         for i in range(len(path_b) + 1):
             potential_better_b, potential_better_a = insert_at_index(path_b, path_a, i, point)
-            print(f'Potential Path A: {potential_better_a}')
-            print(f'Potential Path B: {potential_better_b}')
             potential_better_tour = paths_to_tour(potential_better_a, potential_better_b, points)
             potential_better_weight = tour_weight(potential_better_tour)
-            print_plottertour(potential_better_tour, MAX_VALUE, MAX_VALUE,
-                              path_a=[points[0]] + potential_better_a + [points[-1]],
-                              path_b=[points[0]] + potential_better_b + [points[-1]],
-                              title=f'POTENTIAL point={point}, i={i}, weight={potential_better_weight} (B)')
-            print(f'Tour ({potential_better_weight}): {potential_better_tour}')
+            if 'DEBUG' in environ:
+                print(f'Potential Path A: {potential_better_a}')
+                print(f'Potential Path B: {potential_better_b}')
+                print_plottertour(potential_better_tour, MAX_VALUE, MAX_VALUE,
+                                  path_a=[points[0]] + potential_better_a + [points[-1]],
+                                  path_b=[points[0]] + potential_better_b + [points[-1]],
+                                  title=f'POTENTIAL point={point}, i={i}, weight={potential_better_weight} (B)')
+                print(f'Tour ({potential_better_weight}): {potential_better_tour}')
             if best_weight is None or best_weight > potential_better_weight:
                 best_weight = potential_better_weight
                 best_path_a = potential_better_a
@@ -162,14 +165,15 @@ def plottertour_paths(points: List[Point]) -> Tuple[List[Point], List[Point], Li
         path_a = best_path_a.copy()
         path_b = best_path_b.copy()
         tour = paths_to_tour(path_a, path_b, points)
-        print_plottertour(tour, MAX_VALUE, MAX_VALUE,
-                          path_a=[points[0]] + path_a + [points[-1]],
-                          path_b=[points[0]] + path_b + [points[-1]],
-                          title=f'FINAL point={point}')
-        print()
-        print(f'FINAL A: {path_a}')
-        print(f'FINAL B: {path_b}')
-        print()
+        if 'DEBUG' in environ:
+            print_plottertour(tour, MAX_VALUE, MAX_VALUE,
+                              path_a=[points[0]] + path_a + [points[-1]],
+                              path_b=[points[0]] + path_b + [points[-1]],
+                              title=f'FINAL point={point}')
+            print()
+            print(f'FINAL A: {path_a}')
+            print(f'FINAL B: {path_b}')
+            print()
 
     return [points[0]] + path_a + [points[-1]] + list(reversed(path_b)), path_a, path_b
 
@@ -284,11 +288,7 @@ def random_optimal_tour():
 
 def paths_main() -> None:
     while True:
-        points = [Point(x=0, y=2), Point(x=4, y=5), Point(x=7, y=4), Point(x=10, y=8)]
-        points = [Point(x=2, y=4), Point(x=5, y=1), Point(x=9, y=4), Point(x=10, y=6)]
-        points = [Point(x=1, y=8), Point(x=5, y=0), Point(x=6, y=6), Point(x=7, y=0), Point(x=10, y=3)]
-        # points = gen_points(MAX_VALUE, NUM_POINTS)
-        print(points)
+        points = gen_points(MAX_VALUE, NUM_POINTS)
 
         print()
 
@@ -304,9 +304,14 @@ def paths_main() -> None:
         # print(tour_weight(paths_tour))
         # print_plottertour(paths_tour, MAX_VALUE, MAX_VALUE)
 
-        # if tour_weight(best_tour) == tour_weight(paths_tour):
-        if False:
+        # if False:
+        if tour_weight(best_tour) == tour_weight(paths_tour):
+            print(f'Weight paths: {tour_weight(paths_tour)}')
+            print(f'Weight optimal: {tour_weight(best_tour)}')
             print('OPTIMAL')
+            print_plottertour(best_tour, MAX_VALUE, MAX_VALUE, title='Result best')
+            print_plottertour(paths_tour, MAX_VALUE, MAX_VALUE, title='Result paths')
+            break
         else:
             print('NOT OPTIMAL')
             print(f'Weight paths: {tour_weight(paths_tour)}')

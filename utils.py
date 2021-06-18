@@ -79,6 +79,21 @@ def optimal_tour(points: List[Point]) -> List[Point]:
     return list(best_tour)
 
 
+def optimal_tours(points: List[Point]) -> List[Point]:
+    all_possible_tours = itertools.permutations(points, len(points))
+    best_tours = []
+    best_tour_weight = 999999999999999
+    for tour in all_possible_tours:
+        if is_valid_tour(list(tour)):
+            weight = tour_weight(list(tour))
+            if weight < best_tour_weight:
+                best_tours = [tour]
+                best_tour_weight = weight
+            elif weight == best_tour_weight:
+                best_tours.append(tour)
+    return best_tours
+
+
 def is_valid_tour(tour: List[Point]) -> bool:
     tour_sorted = list(sorted(tour, key=attrgetter('x')))
     smallest_x_point = tour_sorted[0]
